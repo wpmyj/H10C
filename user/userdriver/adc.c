@@ -1,14 +1,20 @@
-/*
-	@filename		: adc.c
-	@author			: Will Fu
-	@date				: 2016-10-25
-	@desc				:
-	@modify			: 2016-10-25 setup
-	@version		: 1.0
- */
+/**
+	*	@filename		: adc.c
+	*	@author			: Will Fu
+	*	@date				: 2016-10-25
+	*	@desc				:
+	*	@modify			: 2016-10-25 setup
+	*	@version		: 1.0
+	*/
 
 #include "adc.h"
 
+/******************************************************************************
+	函数名称：get_adc_val
+	函数说明：获取某一通道AD值
+	输入参数:	channel 0~7--通道0~通道7　8--bandgap
+	输出参数:	返回值uint16_t
+******************************************************************************/
 uint16_t get_adc_val(uint8_t channel)
 {
 	uint16_t adc_val = 0, adc_val_l = 0;
@@ -43,7 +49,7 @@ uint16_t get_adc_val(uint8_t channel)
 	adc_val = ADCRH;
 	adc_val_l = ADCRL;
 
-	adc_val = (adc_val << 4) | (adc_val_l & 0x000f);
+	adc_val = (adc_val << 4) + (adc_val_l & 0x000f);
 
 	return adc_val;
 }
