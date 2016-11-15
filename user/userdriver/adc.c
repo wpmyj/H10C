@@ -2,7 +2,7 @@
 	*	@filename		: adc.c
 	*	@author			: Will Fu
 	*	@date				: 2016-10-25
-	*	@desc				:
+	*	@brief			:
 	*	@modify			: 2016-10-25 setup
 	*	@version		: 1.0
 	*/

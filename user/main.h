@@ -2,7 +2,7 @@
 	@filename		: main.h
 	@author			: Will Fu
 	@date				: 2016-10-25
-	@desc				:
+	@brief			:
 	@modify			: 2016-10-25 setup
 	@version		: 1.0
  */
@@ -21,6 +21,7 @@
 #include "led.h"
 #include "adc.h"
 #include "eeprom.h"
+#include "timer.h"
 
 #endif
 /* END OF FILE */

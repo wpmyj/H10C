@@ -2,7 +2,7 @@
 	*	@filename		: eeprom.c
 	*	@author			: Will Fu
 	*	@date				: 2016-11-14
-	*	@desc				:
+	*	@brief			:
 	*	@modify			: 2016-11-14 setup 驱动有误，目前无法正常使用。
 	*   						2016-11-15 驱动测试OK，之前问题原因是数据类型不匹配。
 	*	@version		: 1.0
