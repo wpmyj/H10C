@@ -26,6 +26,17 @@ void led_init(void)
 	P15_PushPull_Mode;
 
 	P10_Input_Mode;	
+
+	P06_Quasi_Mode;
+	P07_Quasi_Mode;
+
+	LED_Red(OFF);
+	LED_Green(OFF);
+	LED_Yellow(OFF);
+	sensor_ctrl(OFF);
+	beep_ctrl(OFF);
+	relay_ctrl(OFF);
+	valve_ctrl(OFF);
 }
 
 /******************************************************************************

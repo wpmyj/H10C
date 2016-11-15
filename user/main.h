@@ -20,6 +20,7 @@
 
 #include "led.h"
 #include "adc.h"
+#include "eeprom.h"
 
 #endif
 /* END OF FILE */
