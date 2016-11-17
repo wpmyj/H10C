@@ -64,7 +64,7 @@ void sys_init(void)
 
 	printf(sys_info); 
 	calibration_init();
-	printf("value = %x, flag = %bx\r\n", CH4_info.value, CH4_info.flag);
+	printf("value = 0x%x, flag = 0x%bx\r\n", CH4_info.value, CH4_info.flag);
 }
 
 /******************************************************************************
@@ -140,7 +140,13 @@ void normal_state(void)
 	relay_ctrl(OFF);
 	LED_Red(OFF);
 	LED_Yellow(OFF);
-	LED_Green(ON);	
+	LED_Green(ON);
+	
+	if(ON == read_key())
+	{
+		while(ON ==read_key());
+		self_check();
+	}	
 }
 
 /******************************************************************************
@@ -155,6 +161,7 @@ void alarm_state(void)
 	LED_Green(ON);				/* 绿色指示灯长亮 */
 	LED_Red(ON);					/* 红色指示灯长亮 */
 	relay_ctrl(ON);				/* 继电器打开 */
+	beep_ctrl(ON);
 
 	if(0 == alarm_flag)		/* 切阀 */
 	{
@@ -176,6 +183,7 @@ void error_state(void)
 	LED_Red(OFF);
 	LED_Green(OFF);
 	LED_Yellow(ON);				/* 黄色指示灯长亮 */
+	beep_ctrl(ON);
 }
 
 /******************************************************************************
@@ -229,6 +237,7 @@ void get_data(void)
 	uint16_t CH4_data_temp[12] = {0}, power_data_temp[12] = {0};
 	uint16_t CH4_data_sum = 0, power_data_sum = 0;
 	uint8_t i;
+	uint16_t adc_delta = 0;
 
 	for(i = 0; i < 12; i++)
 	{
@@ -244,7 +253,69 @@ void get_data(void)
 	adc_CH4 = CH4_data_sum / 12;
 	adc_power = power_data_sum / 12;
 
+	if(adc_CH4 > adc_power)
+	{
+		adc_delta = adc_CH4 - adc_power;
+	}
+	else
+	{
+		adc_delta = adc_power - adc_CH4;
+	}
 
+	switch(sys_state)
+	{
+		case 0	: break;
+		case 1	: break;
+		case 2	: if(adc_power >= 200 && adc_power < 300)
+							{
+								if(adc_CH4 > CH4_info.value)
+								{
+									sys_state = 3;
+								}
+							}
+							
+							if(adc_power > 500)	/* 传感器(2)--(4,5,6)短路 */
+							{
+								sys_state = 4;	
+							}
+						
+							if(adc_CH4 < 20)		/* 传感器开路 */
+							{
+								sys_state = 4;
+							}
+							else if(adc_CH4 > 4050)	/* 传感器(1,3)--(4,5,6)短路 */
+							{
+								sys_state = 4;			
+							}
+						
+							/* (2)--(1,3)短路 */
+							if(adc_delta < 10)		
+							{
+								sys_state = 4;
+							}
+							break;
+		case 3	: if(adc_CH4 < CH4_info.value)
+							{
+								sys_state = 2;
+							}
+							break;
+		case 4	: if(adc_power >= 200 && adc_power < 300)
+							{
+								if(adc_CH4 < CH4_info.value)
+								{
+									sys_state = 2;
+								}
+								else if(adc_CH4 >= CH4_info.value && adc_CH4 < 4050)
+								{
+									sys_state = 3;
+								}
+							}
+							break;
+		case 5	: sys_state = 2;
+							break;
+		default	: sys_state = 2;
+							break;
+	}
 }
 
 /******************************************************************************
