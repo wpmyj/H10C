@@ -22,6 +22,7 @@
 #include "adc.h"
 #include "eeprom.h"
 #include "timer.h"
+#include "uart.h"
 
 #endif
 /* END OF FILE */

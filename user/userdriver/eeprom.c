@@ -10,11 +10,13 @@
 
 #include "eeprom.h"
 
+CaliInfo CH4_info = {0};
+
 /******************************************************************************
 	函数名称：read_APROM_BYTE
 	函数说明：从APROM中读取一个字节数据
 	输入参数:	u16_addr地址
-	输出参数:	返回uint8_t
+	返回参数:	返回uint8_t
 ******************************************************************************/
 UINT8 read_APROM_BYTE(UINT16 code *u16_addr)
 {
@@ -49,7 +51,7 @@ uint16_t read_CH4_calibration(void)
 	函数名称：write_DATAFLASH_BYTE
 	函数说明：写入一个字节数据
 	输入参数:	u16_addr--写入地址,u8_data--写入数据
-	输出参数:	无
+	返回参数:	无
 ******************************************************************************/
 void write_DATAFLASH_BYTE(UINT16 u16_addr,UINT8 u8_data)
 {
@@ -57,8 +59,9 @@ void write_DATAFLASH_BYTE(UINT16 u16_addr,UINT8 u8_data)
 	unsigned char code *cd_longaddr;
 	unsigned char xdata *xd_tmp;
 	
-//Check page start address
+  /* Check page start address */
 	u8_addrl_r = u16_addr;
+
 	if (u8_addrl_r<0x80)
 	{
 		u8_addrl_r = 0;
@@ -67,9 +70,10 @@ void write_DATAFLASH_BYTE(UINT16 u16_addr,UINT8 u8_data)
 	{
 		u8_addrl_r = 0x80;
 	}
-//Save APROM data to XRAM
+	/* Save APROM data to XRAM */
 	xd_tmp = 0x80;
-	cd_longaddr = (u16_addr&0xff00)+u8_addrl_r;	
+	cd_longaddr = (u16_addr&0xff00)+u8_addrl_r;
+		
 	while (xd_tmp !=0x100)
 	{
 		*xd_tmp = *cd_longaddr;
@@ -77,7 +81,7 @@ void write_DATAFLASH_BYTE(UINT16 u16_addr,UINT8 u8_data)
 		xd_tmp++;
 		cd_longaddr++;
 	}
-// Modify customer data in XRAM
+	/* Modify customer data in XRAM	*/
 	u8_addrl_r = u16_addr;
 	if (u8_addrl_r<0x80)
 	{
@@ -87,17 +91,19 @@ void write_DATAFLASH_BYTE(UINT16 u16_addr,UINT8 u8_data)
 	{
 		xd_tmp = u8_addrl_r+0;
 	}
+
 	*xd_tmp = u8_data;
-//Erase APROM DATAFLASH page
-		IAPAL = u16_addr;
-		IAPAH = u16_addr>>8;
-		IAPFD = 0xFF;
-	  set_IAPEN; 
-		set_APUEN;
-    IAPCN = 0x22; 		
- 		set_IAPGO; 
-//Save changed RAM data to APROM DATAFLASH
+	/* Erase APROM DATAFLASH page	*/
+	IAPAL = u16_addr;
+	IAPAH = u16_addr>>8;
+	IAPFD = 0xFF;
+	set_IAPEN; 
+	set_APUEN;
+	IAPCN = 0x22; 		
+	set_IAPGO; 
+	/* Save changed RAM data to APROM DATAFLASH */
 	u8_addrl_r = u16_addr;
+
 	if (u8_addrl_r<0x80)
 	{
 		u8_addrl_r =0;
@@ -106,28 +112,31 @@ void write_DATAFLASH_BYTE(UINT16 u16_addr,UINT8 u8_data)
 	{
 		u8_addrl_r = 0x80;
 	}
-		xd_tmp = 0x80;
-	  IAPAL = u8_addrl_r;
-    IAPAH = u16_addr>>8;
-		set_IAPEN; 
-		set_APUEN;
-	  IAPCN = 0x21;
-		while (xd_tmp !=0xFF)
-		{
-			IAPFD = *xd_tmp;
-			set_IAPGO;
-			IAPAL++;
-			xd_tmp++;
-		}
-		clr_APUEN;
-		clr_IAPEN;
+
+	xd_tmp = 0x80;
+  IAPAL = u8_addrl_r;
+  IAPAH = u16_addr>>8;
+	set_IAPEN; 
+	set_APUEN;
+  IAPCN = 0x21;
+
+	while (xd_tmp !=0xFF)
+	{
+		IAPFD = *xd_tmp;
+		set_IAPGO;
+		IAPAL++;
+		xd_tmp++;
+	}
+
+	clr_APUEN;
+	clr_IAPEN;
 }
 
 /******************************************************************************
 	函数名称：write_CH4_calibration
 	函数说明：写入甲烷标定数据
 	输入参数:	u16_data
-	输出参数:	无
+	返回参数:	无
 ******************************************************************************/
 void write_CH4_calibration(uint16_t u16_data)
 {
@@ -140,6 +149,52 @@ void write_CH4_calibration(uint16_t u16_data)
 
 	write_DATAFLASH_BYTE(CH4_ADR, data_H);
 	write_DATAFLASH_BYTE(CH4_ADR + 1, data_L);
+}
+
+/******************************************************************************
+	函数名称：calibration_init
+	函数说明：标定数据初始化
+	输入参数:	无
+	返回参数:	无
+******************************************************************************/
+void calibration_init(void)
+{
+	calibration_info_read();
+	
+	if(0xFF == CH4_info.flag)	
+	{
+		write_CH4_calibration(CH4_DEFAULT);
+		write_DATAFLASH_BYTE(CH4_ADR + 2, 0);
+
+		calibration_info_read();
+	}
+}
+
+/******************************************************************************
+	函数名称：calibration_info_read
+	函数说明：标定数据读取
+	输入参数:	无
+	返回参数:	无
+******************************************************************************/
+void calibration_info_read(void)
+{
+	CH4_info.value = read_CH4_calibration();
+	CH4_info.flag = read_APROM_BYTE(CH4_ADR + 2);
+}
+
+/******************************************************************************
+	函数名称：calibration_info_write
+	函数说明：标定数据存储
+	输入参数:	无
+	返回参数:	无
+******************************************************************************/
+void calibration_info_write(uint16_t ad_value)
+{
+	CH4_info.value = ad_value;
+	CH4_info.flag = 1;
+
+	write_CH4_calibration(CH4_info.value);
+	write_DATAFLASH_BYTE(CH4_ADR + 2, CH4_info.flag);
 }
 
 /* END OF FILE */

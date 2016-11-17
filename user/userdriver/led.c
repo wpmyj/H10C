@@ -13,7 +13,7 @@
 	函数名称：led_init
 	函数说明：基本输入输出引脚初始化
 	输入参数:	无
-	输出参数:	无
+	返回参数:	无
 ******************************************************************************/
 void led_init(void)
 {
@@ -26,9 +26,6 @@ void led_init(void)
 	P15_PushPull_Mode;
 
 	P10_Input_Mode;	
-
-	P06_Quasi_Mode;
-	P07_Quasi_Mode;
 
 	LED_Red(OFF);
 	LED_Green(OFF);
