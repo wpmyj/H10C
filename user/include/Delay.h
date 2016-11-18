@@ -1,6 +1,7 @@
 #ifndef DELAY_H
 #define DELAY_H
 
+void delay_ms(uint16_t nMs);
 void Delay10us(UINT16 u16CNT);
 void Timer0_Delay1ms (UINT32 u32CNT);
 void Timer1_Delay1ms (UINT32 u32CNT);

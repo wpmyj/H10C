@@ -31,7 +31,6 @@ void InitialUART0_Timer1(UINT32 u32Baudrate)    //T1M = 1, SMOD = 1
     set_T1M;
     clr_BRCK;        //Serial port 0 baud rate clock source = Timer1
 
- 
 #ifdef FOSC_160000
     TH1 = 256 - (1000000/u32Baudrate+1);               /*16 MHz */
 #endif    	

@@ -12,6 +12,7 @@
 
 #include "N76E003.h"
 #include "Define.h"
+#include "Common.h"
 #include "Function_define.h"
 
 #define ON	1
@@ -30,10 +31,10 @@ sbit Key		= P1^0;
 
 void led_init(void);
 void LED_Red(bit ctrl);
-void LED_Green(bit ctrl);
+void LED_Green(uint8_t ctrl);
 void LED_Yellow(bit ctrl);
 void sensor_ctrl(bit ctrl);
-void beep_ctrl(bit ctrl);
+void beep_ctrl(uint8_t ctrl);
 void relay_ctrl(bit ctrl);
 void valve_ctrl(bit ctrl);
 bit read_key(void);

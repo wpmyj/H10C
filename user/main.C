@@ -12,13 +12,18 @@
 #include "main.h"
 
 extern CaliInfo CH4_info;
+uint8_t err = 0;				/* 校验 */
+uint8_t errs[3] = {0};
 
-uint8_t *sys_info = "H10C_STD_V1.0_20161107\r\n";
+uint8_t *sys_info = "H10C_STD_V1.0_20161118";
 
 uint8_t sys_state = 0;	/* 0--自检　1--预热 2--正常 3--报警 4--故障 5--标定 */
 uint16_t adc_CH4 = 0, adc_power = 0;
 uint8_t alarm_flag = 0; /* 报警切阀标志 */
-uint8_t err = 0;				/* 校验 */
+bit beep_flag = 0;
+uint8_t pre_heat_cnt = 180;
+
+uint16_t timer0_cnt = 0;
 
 void sys_init(void);
 void self_check(void);
@@ -60,11 +65,18 @@ void sys_init(void)
 	led_init();
 	uart0_init();
 	set_CLOEN;
-//	timer_init();
 
-	printf(sys_info); 
+	err = 0;
+	uart0_send_string(sys_info); 
+	send_errs();
+
 	calibration_init();
-	printf("value = 0x%x, flag = 0x%bx\r\n", CH4_info.value, CH4_info.flag);
+
+	err = 0;
+	print_ad(CH4_info.value);
+	uart0_send_byte(',');
+	print_ad(CH4_info.flag);
+	send_errs();
 }
 
 /******************************************************************************
@@ -76,16 +88,16 @@ void sys_init(void)
 void self_check(void)
 {
 	LED_Green(ON);
-	Timer3_Delay1ms(500);
+	delay_ms(500);
 	LED_Green(OFF);
   LED_Red(ON);
-	Timer3_Delay1ms(500);
+	delay_ms(500);
 	LED_Red(OFF);
 	LED_Yellow(ON);
-	Timer3_Delay1ms(500);
+	delay_ms(500);
 	LED_Yellow(OFF);
 	beep_ctrl(ON);
-	Timer3_Delay1ms(500);
+	delay_ms(500);
 	beep_ctrl(OFF);
 }
 
@@ -97,33 +109,23 @@ void self_check(void)
 ******************************************************************************/
 void pre_heat(void)
 {
-	uint16_t i;
-
 	sensor_ctrl(ON);		/* 给传感器供电 */
 
-	for(i = 0; i < 360; i++)
+	pre_heat_cnt--;
+	LED_Green(3);
+
+	if(ON == read_key())
 	{
-		if(i % 2 == 0)
-		{
-			LED_Green(ON);
-		}
-		else
-		{
-			LED_Green(OFF);
-		}
+		delay_ms(20);
 
-		if(read_key() == ON)
+		if(ON == read_key())
 		{
-			Timer3_Delay1ms(20);
-
-			if(read_key() == ON)
-			{
-				break;
-			}
+			while(ON ==read_key());
+			pre_heat_cnt = 0;
 		}
-			
-		Timer3_Delay1ms(500);
 	}
+		
+	delay_ms(520);
 } 
 
 /******************************************************************************
@@ -135,18 +137,21 @@ void pre_heat(void)
 void normal_state(void)
 {
 	alarm_flag = 0;
+	beep_flag = 0;
 	beep_ctrl(OFF);
 	valve_ctrl(OFF);
 	relay_ctrl(OFF);
 	LED_Red(OFF);
 	LED_Yellow(OFF);
 	LED_Green(ON);
-	
+
 	if(ON == read_key())
 	{
 		while(ON ==read_key());
 		self_check();
 	}	
+
+	delay_ms(520);
 }
 
 /******************************************************************************
@@ -161,15 +166,30 @@ void alarm_state(void)
 	LED_Green(ON);				/* 绿色指示灯长亮 */
 	LED_Red(ON);					/* 红色指示灯长亮 */
 	relay_ctrl(ON);				/* 继电器打开 */
-	beep_ctrl(ON);
+
+	if(ON == read_key())
+	{
+		beep_flag = 1;
+	}
 
 	if(0 == alarm_flag)		/* 切阀 */
 	{
 		valve_ctrl(ON);
-		Timer3_Delay1ms(2000);
+		delay_ms(2000);
 		valve_ctrl(OFF);
 		alarm_flag = 1;
 	}
+
+	if(0 == beep_flag)
+	{
+		beep_ctrl(3);
+	}
+	else
+	{
+		beep_ctrl(OFF);
+	}
+
+	delay_ms(520);
 }
 
 /******************************************************************************
@@ -180,10 +200,12 @@ void alarm_state(void)
 ******************************************************************************/
 void error_state(void)
 {
+	beep_flag = 0;
 	LED_Red(OFF);
 	LED_Green(OFF);
 	LED_Yellow(ON);				/* 黄色指示灯长亮 */
-	beep_ctrl(ON);
+	beep_ctrl(3);
+	delay_ms(1520);
 }
 
 /******************************************************************************
@@ -202,18 +224,25 @@ void calibration_state(void)
 	输入参数:	无
 	返回参数:	无
 ******************************************************************************/
-//uint8_t timer0_cnt = 0;
 //void Timer0_ISR (void) interrupt 1
 //{ 
+//	uint16_t alarm_period = 100;	
+//
 //	TH0 = TH0_INIT;
 //  TL0 = TL0_INIT;
 //
-//	if(timer0_cnt < 132)
+//	if(3 == sys_state)
+//		alarm_period = 132;
+//	else if(4 == sys_state)
+//		alarm_period = 264;
+//
+//	if(timer0_cnt < alarm_period)
 //	{
 //		timer0_cnt++;
 //	}
 //	else
-//	{
+//	{	
+//		beep_ctrl(3);
 //		timer0_cnt = 0;
 //	} 
 //}
@@ -268,22 +297,22 @@ void get_data(void)
 		case 1	: break;
 		case 2	: if(adc_power >= 200 && adc_power < 300)
 							{
-								if(adc_CH4 > CH4_info.value)
+								if(adc_CH4 > CH4_info.value)	/* 报警 */
 								{
 									sys_state = 3;
 								}
 							}
 							
-							if(adc_power > 500)	/* 传感器(2)--(4,5,6)短路 */
+							if(adc_power > 500)							/* 传感器(2)--(4,5,6)短路 */
 							{
 								sys_state = 4;	
 							}
 						
-							if(adc_CH4 < 20)		/* 传感器开路 */
+							if(adc_CH4 < 20)								/* 传感器开路 */
 							{
 								sys_state = 4;
 							}
-							else if(adc_CH4 > 4050)	/* 传感器(1,3)--(4,5,6)短路 */
+							else if(adc_CH4 > 4050)					/* 传感器(1,3)--(4,5,6)短路 */
 							{
 								sys_state = 4;			
 							}
@@ -293,6 +322,7 @@ void get_data(void)
 							{
 								sys_state = 4;
 							}
+
 							break;
 		case 3	: if(adc_CH4 < CH4_info.value)
 							{
@@ -311,8 +341,7 @@ void get_data(void)
 								}
 							}
 							break;
-		case 5	: sys_state = 2;
-							break;
+		case 5	: break;
 		default	: sys_state = 2;
 							break;
 	}
@@ -326,10 +355,20 @@ void get_data(void)
 ******************************************************************************/
 void data_report(void)
 {
-	printf("Power = %d\r\n", adc_power);
-	printf("AD = %d\r\n", adc_CH4);
+	err = 0;
+	print_ad(adc_CH4);
+	uart0_send_byte(',');
+	print_ad(adc_power);
+	uart0_send_byte(',');
+	uart0_send_byte(sys_state + '0');
 
-	Timer3_Delay1ms(500);
+	if(sys_state == 1)
+	{
+		uart0_send_byte(',');
+		print_ad(pre_heat_cnt);
+	}
+
+	send_errs();
 }
 
 /******************************************************************************
@@ -346,7 +385,11 @@ void data_process(void)
 							sys_state = 1;	
 							break;
 		case 1	: pre_heat();
-							sys_state = 2;
+
+							if(0 == pre_heat_cnt)
+							{
+								sys_state = 2;
+							}
 							break;
 		case 2	: normal_state();
 							break;
@@ -355,6 +398,7 @@ void data_process(void)
 		case 4	: error_state();
 							break;
 		case 5	: calibration_state();
+							sys_state = 2;
 							break;
 		default	: break;
 	}	

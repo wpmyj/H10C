@@ -9,6 +9,9 @@
 
 #include "uart.h"
 
+extern uint8_t err;
+extern uint8_t errs[3];
+
 /******************************************************************************
 	函数名称：uart0_init
 	函数说明：uart0初始化
@@ -34,6 +37,39 @@ void uart0_send_byte(uint8_t c)
 	SBUF = c;
 	while(TI==0);
 	err += c;
+}
+
+/******************************************************************************
+	函数名称：print_ad
+	函数说明：打印AD值
+	输入参数:	无
+	返回参数:	无
+******************************************************************************/
+void print_ad(uint16_t ad_val)
+{	
+	if(ad_val >= 1000)
+	{
+		uart0_send_byte('0' + ad_val / 1000);
+		uart0_send_byte('0' + ad_val / 100 % 10);
+		uart0_send_byte('0' + ad_val / 10 % 10);
+		uart0_send_byte('0' + ad_val % 10);
+	}
+	else if(ad_val >= 100)
+	{
+		uart0_send_byte('0' + ad_val / 100);
+		uart0_send_byte('0' + ad_val / 10 % 10);
+		uart0_send_byte('0' + ad_val % 10);
+	}
+	else if(ad_val >= 10)
+	{
+		uart0_send_byte('0' + ad_val / 10);
+		uart0_send_byte('0' + ad_val % 10);
+	}
+	else
+	{
+		uart0_send_byte('0' + ad_val);
+	}
+		
 }
 
 /******************************************************************************
@@ -66,5 +102,24 @@ uint8_t toHex(uint8_t t)
 		t += (0x41-10);
 	
 	return t;
+}
+
+/******************************************************************************
+	函数名称：send_errs
+	函数说明：发送校验码
+	输入参数:	无
+	返回参数:	无
+******************************************************************************/
+void send_errs(void)
+{
+	err = (uint8_t)(-(signed char)err); 
+
+	errs[0] = toHex(err >> 4);
+	errs[1] = toHex(err & 0x0f);
+	errs[2] = '\0';
+	uart0_send_byte(0x09);
+	uart0_send_string(errs);
+	uart0_send_byte(0x0d);
+	uart0_send_byte(0x0a);
 }
 /* END OF FILE */

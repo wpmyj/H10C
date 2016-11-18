@@ -60,15 +60,19 @@ void LED_Red(bit ctrl)
 	输入参数:	ON--点亮 OFF--熄灭
 	输出参数:	无
 ******************************************************************************/
-void LED_Green(bit ctrl)
+void LED_Green(uint8_t ctrl)
 {
 	if(OFF == ctrl)
 	{
 		LED_G = 1;
 	}
-	else
+	else if(ON == ctrl)
 	{
 		LED_G = 0;
+	}
+	else
+	{
+		LED_G = ~LED_G;
 	}
 }
 
@@ -111,18 +115,22 @@ void sensor_ctrl(bit ctrl)
 /******************************************************************************
 	函数名称：beep_ctrl
 	函数说明：蜂鸣器控制
-	输入参数:	ON--鸣响　OFF--不响
+	输入参数:	ON--鸣响　OFF--不响	 其他--翻转
 	输出参数:	无
 ******************************************************************************/
-void beep_ctrl(bit ctrl)
+void beep_ctrl(uint8_t ctrl)
 {
 	if(OFF == ctrl)
 	{
 		Beep = 0;
 	}
-	else
+	else if(ON == ctrl)
 	{
 		Beep = 1;
+	}
+	else
+	{
+		Beep = ~Beep;
 	}
 }
 
