@@ -147,17 +147,18 @@
 		#define TIMER_DIV256_VALUE_500ms		65536-46875			//46875*256/24000000 = 500 ms 	// Timer divider = 256
 		#define	TIMER_DIV512_VALUE_1s				65536-46875			//46875*512/24000000 = 1 s.  		// Timer Divider = 512
 #endif
-//-------------------- Timer0 function define --------------------
-#define		TIMER0_MODE0_ENABLE		TMOD&=0x0F
-#define		TIMER0_MODE1_ENABLE		TMOD&=0x0F;TMOD|=0x10
-#define		TIMER0_MODE2_ENABLE		TMOD&=0x0F;TMOD|=0x20
-#define		TIMER0_MODE3_ENABLE		TMOD&=0x0F;TMOD|=0x3F
-//-------------------- Timer1 function define --------------------
-#define		TIMER1_MODE0_ENABLE		TMOD&=0xF0
-#define		TIMER1_MODE1_ENABLE		TMOD&=0xF0;TMOD|=0x01
-#define		TIMER1_MODE2_ENABLE		TMOD&=0xF0;TMOD|=0x02
-#define		TIMER1_MODE3_ENABLE		TMOD&=0xF0;TMOD|=0xF3
 
+//-------------------- Timer0 function define --------------------
+#define		TIMER0_MODE0_ENABLE		TMOD&=0xF0
+#define		TIMER0_MODE1_ENABLE		TMOD&=0xF0;TMOD|=0x01
+#define		TIMER0_MODE2_ENABLE		TMOD&=0xF0;TMOD|=0x02
+#define		TIMER0_MODE3_ENABLE		TMOD&=0xF0;TMOD|=0xF3
+
+//-------------------- Timer1 function define --------------------
+#define		TIMER1_MODE0_ENABLE		TMOD&=0x0F
+#define		TIMER1_MODE1_ENABLE		TMOD&=0x0F;TMOD|=0x10
+#define		TIMER1_MODE2_ENABLE		TMOD&=0x0F;TMOD|=0x20
+#define		TIMER1_MODE3_ENABLE		TMOD&=0x0F;TMOD|=0x3F
 
 //-------------------- Timer2 function define --------------------
 #define TIMER2_DIV_4			T2MOD|=0x10;T2MOD&=0x9F

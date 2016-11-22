@@ -30,7 +30,7 @@ void led_init(void)
 	LED_Red(OFF);
 	LED_Green(OFF);
 	LED_Yellow(OFF);
-	sensor_ctrl(OFF);
+	sensor_ctrl(ON);
 	beep_ctrl(OFF);
 	relay_ctrl(OFF);
 	valve_ctrl(OFF);
