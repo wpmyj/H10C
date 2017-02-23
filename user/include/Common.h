@@ -10,14 +10,6 @@ typedef unsigned char         uint8_t;
 typedef unsigned int          uint16_t;
 typedef unsigned long         uint32_t;
 
-
-#define set_GPIO1		P12=1
-#define clr_GPIO1		P12=0
-#define set_GPIO2		P10=1
-#define clr_GPIO2		P10=0
-#define set_GPIO3		P13=1
-#define clr_GPIO3		P13=0
-
 #define     CID_READ				0x0B
 #define     DID_READ				0x0C
 

@@ -1,7 +1,7 @@
 /*
 	@filename		: main.h
 	@author			: Will Fu
-	@date				: 2016-10-25
+	@date			: 2016-10-25
 	@brief			:
 	@modify			: 2016-10-25 setup
 	@version		: 1.0
@@ -25,4 +25,5 @@
 #include "uart.h"
 
 #endif
+
 /* END OF FILE */

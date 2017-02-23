@@ -18,16 +18,16 @@
 #define ON	1
 #define OFF	0
 
-sbit LED_R 	= P1^2;
-sbit LED_G 	= P1^1;
-sbit LED_Y 	= P1^3;
+sbit LED_R 	= P1^1;
+sbit LED_G 	= P1^3;
+sbit LED_Y 	= P1^4;
 
-sbit Sensor = P1^5;	
-sbit Beep		= P1^4;	 
-sbit Relay	= P0^1;
+sbit Sensor = P0^5;	
+sbit Beep	= P0^1;	 
+sbit Relay	= P1^0;
 sbit Valve	= P0^0;
 
-sbit Key		= P1^0;
+sbit Key	= P1^2;
 
 void led_init(void);
 void LED_Red(bit ctrl);

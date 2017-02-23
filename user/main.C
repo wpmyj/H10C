@@ -1,14 +1,15 @@
 /**
-	*	@filename		: main.c
-	*	@author			: Will Fu
-	*	@date				: 2016-10-25
-	*	@brief			:	MCU型号N76E003
-	*								UART1使用Timer1
-	*								延时使用Timer3
-	*	@modify			: 2016-10-25 setup
-	*								2016-11-22 测试时出现自检完成后重启现象，修改为默认传感器供电。
-	*                          依然有一台样机无法启动。
-	*	@version		: 1.0
+  *	@filename		: main.c
+  *	@author			: Will Fu
+  *	@date			: 2016-10-25
+  *	@brief			: MCU型号N76E003
+  *					  UART1使用Timer1
+  *					  延时使用Timer3
+  *	@modify			: 2016-10-25 setup
+  *		  			  2016-11-22 测试时出现自检完成后重启现象，修改为默认传感器供电。
+  *                   依然有一台样机无法启动。
+  *					  修改Define.h中Timer0和Timer1的TMOD设置。
+  *	@version		: 1.0
   */
 
 #include "main.h"
@@ -46,7 +47,7 @@ void data_report(void);
 ******************************************************************************/
 void main(void) 
 {	
-	sys_init(); 
+	sys_init();
 	
   while(1)
   {
@@ -79,6 +80,8 @@ void sys_init(void)
 	uart0_send_byte(',');
 	print_ad(CH4_info.flag);
 	send_errs();
+
+//	timer_init();
 }
 
 /******************************************************************************
@@ -92,7 +95,7 @@ void self_check(void)
 	LED_Green(ON);
 	delay_ms(500);
 	LED_Green(OFF);
-  LED_Red(ON);
+  	LED_Red(ON);
 	delay_ms(500);
 	LED_Red(OFF);
 	LED_Yellow(ON);
@@ -270,10 +273,10 @@ void get_data(void)
 
 	for(i = 0; i < 12; i++)
 	{
-		CH4_data_temp[i] = get_adc_val(6);
-		Timer3_Delay1ms(20);
-		power_data_temp[i] = get_adc_val(5);
-		Timer3_Delay1ms(20);
+		CH4_data_temp[i] = get_adc_val(5);
+		delay_ms(20);
+		power_data_temp[i] = get_adc_val(6);
+		delay_ms(20);
 
 		CH4_data_sum += CH4_data_temp[i];
 		power_data_sum += power_data_temp[i];
@@ -359,6 +362,8 @@ void data_report(void)
 	print_ad(adc_CH4);
 	uart0_send_byte(',');
 	print_ad(adc_power);
+	uart0_send_byte(',');
+	print_ad(CH4_info.value);
 	uart0_send_byte(',');
 	uart0_send_byte(sys_state + '0');
 

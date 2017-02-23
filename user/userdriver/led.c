@@ -19,13 +19,13 @@ void led_init(void)
 {
 	P00_PushPull_Mode;
 	P01_PushPull_Mode;
+	P05_PushPull_Mode;
+	P10_PushPull_Mode;
 	P11_PushPull_Mode;
-	P12_PushPull_Mode;
 	P13_PushPull_Mode;
 	P14_PushPull_Mode;
-	P15_PushPull_Mode;
 
-	P10_Input_Mode;	
+	P12_Input_Mode;	
 
 	LED_Red(OFF);
 	LED_Green(OFF);

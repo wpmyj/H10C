@@ -1,11 +1,11 @@
 /**
-	*	@filename	: uart.c
-	*	@author		: Will Fu
-	*	@date			: 2016-11-16
-	*	@brief		: uartÇý¶¯
-	*	@maodify	: 2016-11-16 setup
-	*	@version	: 1.0
-	*/
+  *	@filename	: uart.c
+  *	@author		: Will Fu
+  *	@date		: 2016-11-16
+  *	@brief		: uartÇý¶¯
+  *	@maodify	: 2016-11-16 setup
+  *	@version	: 1.0
+  */
 
 #include "uart.h"
 
